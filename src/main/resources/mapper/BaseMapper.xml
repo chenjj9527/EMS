@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.infosky.mapper.DetailMapper">
+    <resultMap id="BaseDetail" type="com.infosky.entity.BaseDetail">
+        <association property="Base" javaType="com.infosky.entity.Base">
+            <id column="baseRecId" jdbcType="DECIMAL" property="baseRecId" />
+            <result column="fee" jdbcType="INTEGER" property="fee" />
+        </association>
+        <collection property="Detail" ofType="com.infosky.entity.Detail">
+            <id property="detailRecId" jdbcType="DECIMAL" column="detailRecId"/>
+            <result column="baseRecId" jdbcType="INTEGER" property="baseRecId" />
+            <result column="fee" jdbcType="INTEGER" property="fee" />
+        </collection>
+    </resultMap>
+
+
+    <insert id="insert" parameterType="java.util.List">
+        DECLARE
+        baseRecId INTEGER ;
+        detailRecId INTEGER ;
+        <foreach collection="list" item="item" index="index" open="begin" close="end;">
+            select seq_base.nextval into baseRecId from dual;
+            insert into base(baseRecId, fee) values(baseRecId, #{item.base.fee,jdbcType=DECIMAL});
+            <foreach collection="item.detail" item="detail" index="index">
+                select seq_detail.nextval into detailRecId from dual;
+                insert into detail(detailRecId, baseRecId, fee) values(detailRecId,baseRecId,#{detail.fee,jdbcType=DECIMAL});
+            </foreach>
+        </foreach>
+    </insert>
+
+</mapper>

@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.infosky.mapper.EmpMapper">
+    <resultMap id="Emp" type="com.infosky.entity.Emp">
+        <id column="RECID" jdbcType="DECIMAL" property="recId" />
+        <result column="EMPNAME" jdbcType="VARCHAR" property="empName" />
+    </resultMap>
+
+
+    <insert id="insertSingle" parameterType="com.infosky.entity.Emp" >
+        insert into Emp(
+        recId,
+        empName
+        )
+        values (SEQ_EMP.NEXTVAL,#{empName,jdbcType=VARCHAR})
+    </insert>
+
+
+    <insert id="insert" parameterType="java.util.List">parameterType
+        declare recId INTEGER;
+        <foreach collection="list" item="item" open="BEGIN" close="END;"  >
+            select SEQ_EMP.NEXTVAL into recId from dual;
+            INSERT INTO Emp (recId,empName) VALUES
+            (recId,#{item.empName,jdbcType=VARCHAR});
+        </foreach>
+    </insert>
+
+
+    <!--<insert id="insert" parameterType="ArrayList" useGeneratedKeys="true">-->
+        <!--<selectKey keyProperty="recID" order="BEFORE" resultType="int">-->
+            <!--SELECT SEQ_EMP.NEXTVAL FROM DUAL-->
+        <!--</selectKey>-->
+        <!--INSERT INTO Emp(recID,empName) SELECT SEQ_EMP.NEXTVAL, A.* FROM (-->
+        <!--<foreach collection="list" item="emp" index="index" separator="UNION ALL">-->
+            <!--SELECT #{emp.empName,jdbcType=VARCHAR} FROM DUAL-->
+        <!--</foreach>-->
+        <!--) A-->
+    <!--</insert>-->
+
+
+    <update id="updateSingle" parameterType="com.infosky.entity.Emp" >
+        update Emp
+        set empName = #{empName,jdbcType=VARCHAR}
+        where recId = #{recId,jdbcType=DECIMAL}
+    </update>
+
+
+
+    <select id="select" resultMap="Emp">
+        select recId,empName
+        from Emp
+    </select>
+
+
+    <update id="update" parameterType="java.util.List" >
+        <foreach collection="list" item="item" index="index" open="begin" close=";end;" separator=";">
+            update Emp set
+            empName = #{item.empName,jdbcType=NVARCHAR}
+            where recId = #{item.recId,jdbcType=DECIMAL}
+        </foreach>
+    </update>
+
+</mapper>

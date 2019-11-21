@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.infosky.mapper.DepartmentMapper">
+    <resultMap id="Department" type="com.infosky.entity.Department">
+        <id column="DEPARTMENT_REC_ID"  property="departmentRecId" jdbcType="INTEGER"/>
+        <result column="DEPARTMENT_ID"  property="departmentId" jdbcType="INTEGER"/>
+        <result column="DEPARTMENT_NAME"  property="departmentName" jdbcType="VARCHAR"/>
+        <result column="DEPARTMENT_MANAGER"  property="departmentManager" jdbcType="VARCHAR"/>
+        <result column="DEPARTMENT_DESCRIPTION"  property="departmentDescription" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <!--使用别名形式,下面可用resultType="com.infosky.entity.Department"-->
+    <!--<sql id="Base_Column_List">-->
+    <!--DEPARTMENT_REC_ID departmentRecId, DEPARTMENT_ID departmentId, DEPARTMENT_NAME departmentName,-->
+    <!--DEPARTMENT_MANAGER departmentManager, DEPARTMENT_DESCRIPTION departmentDescription-->
+   <!--</sql>-->
+
+    <sql id="Base_Column_List">
+        DEPARTMENT_REC_ID, DEPARTMENT_ID, DEPARTMENT_NAME, DEPARTMENT_MANAGER, DEPARTMENT_DESCRIPTION
+    </sql>
+
+    <!-- 根据QueryDto查询数据总条数 -->
+    <select id="departmentCountByQueryDto" parameterType="com.infosky.dto.QueryDto" resultType="Integer">
+        select count(*) from DEPARTMENT
+    </select>
+
+    <!-- 根据QueryDto分页查询数据结果集 -->
+    <select id="selectDepartmentListByQueryDto" parameterType="java.util.Map" resultMap="Department">
+        select
+            <include refid="Base_Column_List" />
+        from (select DEPARTMENT.* ,rownum rn from DEPARTMENT)
+        <where>
+            <if test="departmentId != null and departmentId != ''">
+                DEPARTMENT_ID like '%'||#{departmentId,jdbcType=INTEGER}||'%'
+            </if>
+            <if test="departmentName!= null and department_name != ''">
+                and DEPARTMENT_NAME like '%'||#{departmentName,jdbcType=VARCHAR}||'%'
+            </if>
+            and rn &lt;=(#{startRow}+#{size}-1) AND rn &gt;=#{startRow}
+        </where>
+        order by DEPARTMENT_ID asc
+    </select>
+
+    <!-- 查询部门信息 -->
+    <select id="selectDepartmentById" parameterType="java.lang.Integer" resultMap="Department">
+        select
+            <include refid="Base_Column_List" />
+        from DEPARTMENT
+        <where>
+            DEPARTMENT_REC_ID = #{departmentRecId,jdbcType=INTEGER}
+        </where>
+        order by DEPARTMENT_REC_ID asc
+    </select>
+
+    <!-- 查询部门编号 -->
+    <select id="findDepartmentById" parameterType="java.lang.Integer" resultMap="Department">
+        select
+            DEPARTMENT_ID
+        from DEPARTMENT
+        <where>
+            DEPARTMENT_ID = #{departmentId}
+        </where>
+    </select>
+
+    <!-- 更新 -->
+    <update id="updateDepartment" parameterType="com.infosky.entity.Department" >
+    update DEPARTMENT
+    set DEPARTMENT_ID = #{departmentId,jdbcType=INTEGER},
+        DEPARTMENT_NAME = #{departmentName,jdbcType=VARCHAR},
+        DEPARTMENT_MANAGER = #{departmentManager,jdbcType=VARCHAR},
+        DEPARTMENT_DESCRIPTION = #{departmentDescription,jdbcType=VARCHAR}
+    where DEPARTMENT_REC_ID = #{departmentRecId,jdbcType=INTEGER}
+    </update>
+
+    <!-- 删除 -->
+    <delete id="deleteDepartmentById" parameterType="java.lang.Integer">
+      delete from DEPARTMENT
+      where DEPARTMENT_REC_ID = #{departmentRecId,jdbcType=INTEGER}
+    </delete>
+
+    <!-- 新增 -->
+    <insert id="insertDepartment" parameterType="com.infosky.entity.Department" >
+      insert into DEPARTMENT (DEPARTMENT_REC_ID, DEPARTMENT_ID, DEPARTMENT_NAME,
+      DEPARTMENT_MANAGER, DEPARTMENT_DESCRIPTION)
+      values (seq_department.nextval, #{departmentId,jdbcType=INTEGER}, #{departmentName,jdbcType=VARCHAR},
+      #{departmentManager,jdbcType=VARCHAR}, #{departmentDescription,jdbcType=VARCHAR})
+    </insert>
+
+    <!-- 查询部门名称 -->
+    <select id="selectDepartmentName" parameterType="java.util.Map" resultMap="Department">
+        select DEPARTMENT_ID,DEPARTMENT_NAME from DEPARTMENT
+    </select>
+
+    <!-- 批量删除 -->
+    <delete id="deleteMany" parameterType="java.util.List">
+        delete from DEPARTMENT where DEPARTMENT_REC_ID in
+        <foreach item="ids" collection="list" open="(" separator="," close=")">
+            #{ids}
+        </foreach>
+    </delete>
+</mapper>
